@@ -279,6 +279,7 @@ function getSmsCapability(){
     declare -A dict
     while IFS="=" read -r k v; do
       dict[$k]=$v
+    #done < <(...) 进程替换
     done < <(echo "$body" | jq -r '. | to_entries[] | "\(.key)=\(.value)"')
     #${#array[@]} 返回元素数量, 获取关联数组元素数量的标准方法，与普通数组的用法一致
     echo "Test point B"
@@ -342,12 +343,15 @@ function deleteMessage(){
 comment
 function lookForUnread(){
     #echo -e "\n寻找未读"
+     echo "Test point A"
     declare -A dict
     while IFS="=" read -r k v; do
       dict[$k]=$v
     done < <(echo $msgArrRst | jq -r ' .messages | map (select(.tag=="1")) | if length > 0 then last else {} end | to_entries[] | "\(.key)=\(.value)"')
     #${#array[@]} 返回元素数量, 获取关联数组元素数量的标准方法，与普通数组的用法一致
+     echo "Test point B"
     [ "${#dict[@]}" -eq 0 ] && return;
+     echo "Test point C"
     #echo ${dict["tag"]}
     #echo ${dict["id"]}
     #echo ${dict["date"]}
@@ -368,7 +372,8 @@ function lookForUnread(){
 
 function init(){
     getLoginStatus
-    if [ "$hasLogin" == "true" ]; then getSmsCapability; getSMSMessages; else login; fi
+    if [ "$hasLogin" == "true" ]; then getSMSMessages; else login; fi
+    #getSmsCapability; 
 
     sleep 15
     init
