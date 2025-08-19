@@ -275,13 +275,17 @@ function getSmsCapability(){
     #echo "HTTP Status: $http_status"
     #echo "Response Body:"
     #echo "$body" | jq . 2>/dev/null || echo "$body"
+    echo "Test point A"
     declare -A dict
     while IFS="=" read -r k v; do
       dict[$k]=$v
     done < <(echo "$body" | jq -r '. | to_entries[] | "\(.key)=\(.value)"')
     #${#array[@]} 返回元素数量, 获取关联数组元素数量的标准方法，与普通数组的用法一致
+    echo "Test point B"
     [ "${#dict[@]}" -eq 0 ] && return;
-    echo "${dict["sms_nv_rev_total"]}"
+    echo "Test point C"
+    sms_total="${dict["sms_nv_total"]}"
+    echo "$sms_total"
     used=$(( "${dict['sms_nv_rev_total']}" + "${dict['sms_nv_send_total']}" + "${dict['sms_nv_draftbox_total']}" ))
     max="${dict['sms_nv_total']}"
     if [ "$shoulShowCapacity" == "true" ]; then echo "容量 $used / $max"; fi
