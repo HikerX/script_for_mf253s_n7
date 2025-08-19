@@ -280,8 +280,7 @@ function getSmsCapability(){
       dict[$k]=$v
     done < <(echo "$body" | jq -r '. | to_entries[] | "\(.key)=\(.value)"')
     #${#array[@]} 返回元素数量, 获取关联数组元素数量的标准方法，与普通数组的用法一致
-    [ "${#dict[@]}" -eq 0 ] && return;
-    echo "${dict["sms_nv_total"]}"
+    [ "${#dict[@]}" -eq 0 ] && return;    
     echo ${dict["sms_nv_rev_total"]}
     echo "${dict['sms_nv_send_total']}"
     used=$(( "${dict['sms_nv_rev_total']}" + "${dict['sms_nv_send_total']}" + "${dict['sms_nv_draftbox_total']}" ))
