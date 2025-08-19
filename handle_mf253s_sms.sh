@@ -257,7 +257,7 @@ function setSmsRead(){
 comment
 #service.getSmsCapability
 function getSmsCapability(){
-    #echo -e "\n查询容量"
+    echo -e "\n查询容量"
     response=$(curl \
       -H "${HEADERS[0]}" \
       -H "${HEADERS[2]}" \
@@ -280,8 +280,8 @@ function getSmsCapability(){
       dict[$k]=$v
     done < <(echo "$body" | jq -r '. | to_entries[] | "\(.key)=\(.value)"')
     #${#array[@]} 返回元素数量, 获取关联数组元素数量的标准方法，与普通数组的用法一致
-    [ "${#dict[@]}" -eq 0 ] && return;    
-    echo ${dict["sms_nv_rev_total"]}
+    [ "${#dict[@]}" -eq 0 ] && return;     
+    echo "${dict["sms_nv_rev_total"]}"
     echo "${dict['sms_nv_send_total']}"
     used=$(( "${dict['sms_nv_rev_total']}" + "${dict['sms_nv_send_total']}" + "${dict['sms_nv_draftbox_total']}" ))
     max="${dict['sms_nv_total']}"
