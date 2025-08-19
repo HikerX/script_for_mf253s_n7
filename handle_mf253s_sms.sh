@@ -209,7 +209,7 @@ function getSMSMessages(){
     # =~ 字符正则表达式匹配符号，这里的正则表达式更简化了
     # {messages: [{"id":"15145","content":"30109A8C8B","tag":"0","date": "25,08,15,22,23,56,+32","draft_group_id":""}]}'
     #{"sms_data_total":""}
-    if [[ "$body" =~ number ]]; then msgArrRst="$body"; lookForUnreaded; else echo "$body"; fi
+    if [[ "$body" =~ number ]]; then msgArrRst="$body"; lookForUnread; else echo "$body"; fi
 }
 
 
@@ -279,7 +279,7 @@ function getSmsCapability(){
     while IFS="=" read -r k v; do
       dict[$k]=$v
     done < <(echo "$body" | jq -r '. | to_entries[] | "\(.key)=\(.value)"')
-    used=$(( ${dict["sms_nv_rev_total"]}+${dict["sms_nv_send_total"]}+${dict["sms_nv_draftbox_total"]} ))
+    used=$(( "${dict['sms_nv_rev_total']}" + "${dict['sms_nv_send_total']}" + "${dict['sms_nv_draftbox_total']}" ))
     max="${dict['sms_nv_total']}"
     if [ "$shoulShowCapacity" == "true" ]; then echo "容量 $used / $max"; fi
     [ $(($used + 10 )) -le "$max" ] && shoulShowCapacity="false"; return;
@@ -319,7 +319,7 @@ function deleteMessage(){
     #echo "HTTP Status: $http_status"
     #echo "Response Body:"
     #echo "$body" | jq . 2>/dev/null || echo "$body"
-    if [[ "$body" =~ success ]]; then echo "删除成功"; else echo "$body"; fi
+    if [[ "$body" =~ success ]]; then echo "删除成功 $1"; else echo "$body"; fi
     shoulShowCapacity="true"
 }
 
@@ -333,7 +333,7 @@ function deleteMessage(){
     "draft_group_id": ""
 }
 comment
-function lookForUnreaded(){
+function lookForUnread(){
     #echo -e "\n寻找未读"
     declare -A dict
     while IFS="=" read -r k v; do
@@ -363,7 +363,7 @@ function init(){
     getLoginStatus
     if [ "$hasLogin" == "true" ]; then getSmsCapability; getSMSMessages; else login; fi
 
-    sleep 45
+    sleep 30
     init
 }
 #Bark通知服务Key, set env: export BARK_KEY="..."
