@@ -282,7 +282,8 @@ function getSmsCapability(){
     #${#array[@]} 返回元素数量, 获取关联数组元素数量的标准方法，与普通数组的用法一致
     [ "${#dict[@]}" -eq 0 ] && return;
     echo "${dict["sms_nv_total"]}"
-    echo "${dict["sms_nv_rev_total"]}" "${dict[\"sms_nv_send_total\"]}" "${dict['sms_nv_draftbox_total']}"
+    echo ${dict["sms_nv_rev_total"]}
+    echo "${dict['sms_nv_send_total']}"
     used=$(( "${dict['sms_nv_rev_total']}" + "${dict['sms_nv_send_total']}" + "${dict['sms_nv_draftbox_total']}" ))
     max="${dict['sms_nv_total']}"
     if [ "$shoulShowCapacity" == "true" ]; then echo "容量 $used / $max"; fi
@@ -367,7 +368,7 @@ function init(){
     getLoginStatus
     if [ "$hasLogin" == "true" ]; then getSmsCapability; getSMSMessages; else login; fi
 
-    sleep 30
+    sleep 15
     init
 }
 #Bark通知服务Key, set env: export BARK_KEY="..."
