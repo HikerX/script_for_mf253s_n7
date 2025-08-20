@@ -221,10 +221,10 @@ function getSMSMessages(){
     # =~ 字符正则表达式匹配符号，这里的正则表达式更简化了
     # {messages: [{"id":"15145","content":"30109A8C8B","tag":"0","date": "25,08,15,22,23,56,+32","draft_group_id":""}]}'
     #{"sms_data_total":""}
-    if [[ "$body" =~ messages ]]; then 
+    if [[ "$body" =~ messages ]]; then
         msgArrStr=$(echo "$body" | jq -r '.messages')
-        msgArrLen=$(echo "$msgArrStr" | jq -r '. |  length') 
-        [ "$msgArrLen" -gt 0 ] && lookForUnread; 
+        msgArrLen=$(echo "$msgArrStr" | jq -r '. |  length')
+        [ "$msgArrLen" -gt 0 ] && lookForUnread;
     else echo "$body"; fi
 }
 
@@ -296,12 +296,12 @@ function getSmsCapability(){
     sms_nv_size=$(echo "$body" | jq -r '.sms_nv_total')
     sms_nv_rev_qty=$(echo "$body" | jq -r '.sms_nv_rev_total')
     sms_nv_send_qty=$(echo "$body" | jq -r '.sms_nv_send_total')
-    sms_nv_draftbox_qty=$(echo "$body" | jq -r '.sms_nv_draftbox_total')    
+    sms_nv_draftbox_qty=$(echo "$body" | jq -r '.sms_nv_draftbox_total')
     used=$(( "$sms_nv_rev_qty" + "$sms_nv_send_qty" + "$sms_nv_draftbox_qty" ))
     [ $(($used + 10)) -le "$sms_nv_size" ] && return;
     delQty=$(( "$used" - 10 )) #keep 10 left
     echo "容量已用 $used / $sms_nv_size, 删除最早 $delQty 条, $(date +'%Y-%m-%d %H:%M:%S')"
-    toDelIds=$(echo "$msgArrStr" | jq -r ".[-$delQty: ] | [.[].id] | join(\";\")")    
+    toDelIds=$(echo "$msgArrStr" | jq -r ".[-$delQty: ] | [.[].id] | join(\";\")")
     #echo "toDelIds: $toDelIds"
     deleteMessage "$toDelIds"
 }
@@ -367,12 +367,11 @@ function lookForUnread(){
     msgDate=$(echo "$msg_date" | sed "s/\([0-9]\+\),\([0-9]\+\),\([0-9]\+\),\([0-9]\+\),\([0-9]\+\),\([0-9]\+\),.*/$(date +%Y)-\2-\3 \4:\5:\6/g")
     plainContent=$(decode_message "$msg_content")
     echo "$msg_number: $plainContent"$'\n'"$msgDate"  # $'\n' 动态换行 直接\n换行没效果
-    if [[ "$plainContent" =~ 验证密?码|流量(使用|用尽)提醒 ]]; then
-        isArchive="1" #bark是否存档, 验证码不存档
-        [[ "$plainContent" =~ 验证密?码 ]] && isArchive="0" && deleteMessage "$msg_id;"
-        notify_bark  "$msg_number"  "$plainContent"$'\n'"$msgDate"  "$isArchive";
-    else
-        setSmsRead "$msg_id;"
+	# isArchive="0" ; bark是否存档, 验证码不存档
+    if [[ "$plainContent" =~ 验证密?码 ]]; then deleteMessage  "$msg_id;" ; notify_bark  "$msg_number"  "$plainContent"$'\n'"$msgDate"  "0";
+    elif [[ "$plainContent" =~ 流量(使用|用尽)提醒 ]]; then setSmsRead  "$msg_id;"; notify_bark  "$msg_number"  "$plainContent"$'\n'"$msgDate"  "1";
+	elif [[ "$plainContent" =~ 您已免费获得中国移动.*|流量券到账提醒|流量兑换券使用成功 ]]; then deleteMessage  "$msg_id;";
+    else setSmsRead "$msg_id;"
     fi
 }
 
