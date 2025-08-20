@@ -9,22 +9,13 @@
 API_SET_URL="http://192.168.0.1/goform/goform_set_cmd_process"
 API_GET_URL="http://192.168.0.1/goform/goform_get_cmd_process"
 
-# 请求头设置 (JSON格式)
+# 请求头设置 (form / JSON格式)
 HEADERS=(
   "Accept:  application/json, text/javascript, */*; q=0.01"
   "Content-Type: application/x-www-form-urlencoded; charset=UTF-8"
   "Referer: http://192.168.0.1/index.html"
   "Content-Type: application/json; charset=UTF-8"
 )
-
-# POST数据内容 (JSON格式)
-POST_DATA='{
-    "isTest": "true",
-    "goformId": "LOGIN",
-    # echo -n "admin" | base64
-    "password": "YWRtaW4="
-}'
-
 
 #查询短信结果，全局变量
 hasLogin="false"
@@ -144,7 +135,7 @@ function getLoginStatus(){
     #echo "Response Body:"
     #echo "$body" | jq . 2>/dev/null || echo "$body"
     #"loginfo": "" or "ok"
-    if [[ "$body" =~ ok ]]; then hasLogin="true"; else hasLogin="false"; echo "登录已失效"; fi
+    if [[ "$body" =~ ok ]]; then hasLogin="true"; else hasLogin="false"; fi
 }
 
 
@@ -177,7 +168,7 @@ function login(){
     #echo "Response Body:"
     #echo "$body" | jq . 2>/dev/null || echo "$body"
     #{"result": "0"}  {"result": "failure"}
-    if [[ "$body" =~ 0 ]]; then echo "登录成功, $(date +'%Y-%m-%d %H:%M:%S')"; else echo "登录 $body"; fi
+    [[ "$body" =~ failure ]] && echo "登录 $body"
 }
 
 
@@ -300,7 +291,7 @@ function getSmsCapability(){
     used=$(( "$sms_nv_rev_qty" + "$sms_nv_send_qty" + "$sms_nv_draftbox_qty" ))
     [ $(($used + 10)) -le "$sms_nv_size" ] && return;
     delQty=$(( "$used" - 10 )) #keep 10 left
-    echo "容量已用 $used / $sms_nv_size, 删除最早 $delQty 条, $(date +'%Y-%m-%d %H:%M:%S')"
+    echo "容量 $used / $sms_nv_size, 删除最早 $delQty 条, $(date +'%Y-%m-%d %H:%M:%S')"
     toDelIds=$(echo "$msgArrStr" | jq -r ".[-$delQty: ] | [.[].id] | join(\";\")")
     #echo "toDelIds: $toDelIds"
     deleteMessage "$toDelIds"
@@ -369,8 +360,8 @@ function lookForUnread(){
     echo "$msg_number: $plainContent"$'\n'"$msgDate"  # $'\n' 动态换行 直接\n换行没效果
 	# isArchive="0" ; bark是否存档, 验证码不存档
     if [[ "$plainContent" =~ 验证密?码 ]]; then deleteMessage  "$msg_id;" ; notify_bark  "$msg_number"  "$plainContent"$'\n'"$msgDate"  "0";
-    elif [[ "$plainContent" =~ 流量(使用|用尽)提醒 ]]; then setSmsRead  "$msg_id;"; notify_bark  "$msg_number"  "$plainContent"$'\n'"$msgDate"  "1";
-	elif [[ "$plainContent" =~ 您已免费获得中国移动.*|流量券到账提醒|流量兑换券使用成功 ]]; then deleteMessage  "$msg_id;";
+    elif [[ "$plainContent" =~ 流量(使用|用尽)提醒|话费账单 ]]; then setSmsRead  "$msg_id;"; notify_bark  "$msg_number"  "$plainContent"$'\n'"$msgDate"  "1";
+	elif [[ "$plainContent" =~ 您已免费获得中国移动.*|到账提醒|(话费|流量)兑换券使用成功|反诈|应急|爱卫办 ]]; then deleteMessage  "$msg_id;";
     else setSmsRead "$msg_id;"
     fi
 }
