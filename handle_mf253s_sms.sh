@@ -380,7 +380,7 @@ function init(){
     getLoginStatus
     #优先获取短信列表，再查询容量;假设当前容量已满，需要知道短信id，才能进行删除操作，
     if [ "$hasLogin" == "true" ]; then getSMSMessages; getSmsCapability; else login; fi
-    sleep 15
+    sleep 5
     init
 }
 #Bark通知服务Key, set env: export BARK_KEY="..."
