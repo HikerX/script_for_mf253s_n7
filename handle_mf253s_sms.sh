@@ -367,7 +367,7 @@ function lookForUnread(){
     msgDate=$(echo "$msg_date" | sed "s/\([0-9]\+\),\([0-9]\+\),\([0-9]\+\),\([0-9]\+\),\([0-9]\+\),\([0-9]\+\),.*/$(date +%Y)-\2-\3 \4:\5:\6/g")
     plainContent=$(decode_message "$msg_content")
     echo "$msg_number: $plainContent"$'\n'"$msgDate"  # $'\n' 动态换行 直接\n换行没效果
-    if [[ "$plainContent" =~ 验证密?码|流量使用提醒|流量用尽提醒 ]]; then
+    if [[ "$plainContent" =~ 验证密?码|流量(使用|用尽)提醒 ]]; then
         isArchive="1" #bark是否存档, 验证码不存档
         [[ "$plainContent" =~ 验证密?码 ]] && isArchive="0" && deleteMessage "$msg_id;"
         notify_bark  "$msg_number"  "$plainContent"$'\n'"$msgDate"  "$isArchive";
