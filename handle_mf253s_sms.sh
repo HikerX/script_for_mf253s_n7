@@ -85,7 +85,7 @@ function decode_message() {
 
 #bark if [[ "$plainContent" =~ 验证密?码|流量使用提醒 ]];
 function notify_bark(){
-    echo " 发送通知 $1"
+    echo "发送通知 $1"
     # 构建JSON负载, 把device_key放入请求体，而非url
     # sound tweet 鸟鸣; telegraph 电报; calypso 卡利普索; horn 号角; chime 铃声; tiptoes 踮脚尖
     payload=$(jq -n \
