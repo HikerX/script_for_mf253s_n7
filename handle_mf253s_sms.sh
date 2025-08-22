@@ -284,17 +284,18 @@ function getSmsCapability(){
     #echo "Response Body:"
     #echo "$body" | jq . 2>/dev/null || echo "$body"
     #declare -A dict; #使用 关联数组 和 进程替换 ，在 termux (an)测试通过，在iSH(iOS)测试失败
-    sms_nv_size=$(echo "$body" | jq -r '.sms_nv_total')
+    sms_nv_size=$(echo "$body" | jq -r '.sms_nv_total') # possible "null"
     sms_nv_rev_qty=$(echo "$body" | jq -r '.sms_nv_rev_total')
     sms_nv_send_qty=$(echo "$body" | jq -r '.sms_nv_send_total')
     sms_nv_draftbox_qty=$(echo "$body" | jq -r '.sms_nv_draftbox_total')
     used=$(( "$sms_nv_rev_qty" + "$sms_nv_send_qty" + "$sms_nv_draftbox_qty" ))
-    [ $(($used + 10)) -le "$sms_nv_size" ] && return;
+    ( [[ "$sms_nv_size" == "null" ]] || [ $(($used + 10)) -le "$sms_nv_size" ] ) && return;
     delQty=$(( "$used" - 10 )) #keep 10 left
     echo "容量 $used / $sms_nv_size, 删除最早 $delQty 条, $(date +'%Y-%m-%d %H:%M:%S')"
     toDelIds=$(echo "$msgArrStr" | jq -r ".[-$delQty: ] | [.[].id] | join(\";\")")
     #echo "toDelIds: $toDelIds"
-    deleteMessage "$toDelIds"
+    #结尾必须补上';'
+    deleteMessage "$toDelIds;"
 }
 
 
@@ -358,10 +359,10 @@ function lookForUnread(){
     msgDate=$(echo "$msg_date" | sed "s/\([0-9]\+\),\([0-9]\+\),\([0-9]\+\),\([0-9]\+\),\([0-9]\+\),\([0-9]\+\),.*/$(date +%Y)-\2-\3 \4:\5:\6/g")
     plainContent=$(decode_message "$msg_content")
     echo "$msg_number: $plainContent"$'\n'"$msgDate"  # $'\n' 动态换行 直接\n换行没效果
-	# isArchive="0" ; bark是否存档, 验证码不存档
+    # isArchive="0" ; bark是否存档, 验证码不存档
     if [[ "$plainContent" =~ 验证密?码 ]]; then deleteMessage  "$msg_id;" ; notify_bark  "$msg_number"  "$plainContent"$'\n'"$msgDate"  "0";
     elif [[ "$plainContent" =~ 流量(使用|用尽)提醒|话费账单 ]]; then setSmsRead  "$msg_id;"; notify_bark  "$msg_number"  "$plainContent"$'\n'"$msgDate"  "1";
-	elif [[ "$plainContent" =~ 您已免费获得中国移动.*|到账提醒|(话费|流量)兑换券使用成功|反诈|应急|爱卫办 ]]; then deleteMessage  "$msg_id;";
+    elif [[ "$plainContent" =~ 您已免费获得中国移动.*|到账提醒|(话费|流量)兑换券使用成功|公益短信|公安|应急|爱卫办 ]]; then deleteMessage  "$msg_id;";
     else setSmsRead "$msg_id;"
     fi
 }
