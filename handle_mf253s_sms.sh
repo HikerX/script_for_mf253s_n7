@@ -85,7 +85,7 @@ function decode_message() {
 
 #bark if [[ "$plainContent" =~ 验证密?码|流量使用提醒 ]];
 function notify_bark(){
-    echo -e "\n发送通知 $1"
+    echo " 发送通知 $1"
     # 构建JSON负载, 把device_key放入请求体，而非url
     # sound tweet 鸟鸣; telegraph 电报; calypso 卡利普索; horn 号角; chime 铃声; tiptoes 踮脚尖
     payload=$(jq -n \
@@ -302,7 +302,7 @@ function getSmsCapability(){
 #service.deleteMessage
 function deleteMessage(){
     # 执行curl命令
-    # echo -e "\n删除短信 id=$1"
+    echo "删除短信 $1"
     response=$(curl -X "POST" \
       -H "${HEADERS[0]}" \
       -H "${HEADERS[1]}" \
@@ -326,7 +326,7 @@ function deleteMessage(){
     #echo "HTTP Status: $http_status"
     #echo "Response Body:"
     #echo "$body" | jq . 2>/dev/null || echo "$body"
-    if [[ "$body" =~ success ]]; then echo "删除成功 $1"; else echo "$body"; fi
+    ! [[ "$body" =~ success ]] && echo "$body";
 }
 
 :<<'comment'
@@ -358,7 +358,7 @@ function lookForUnread(){
     # "25,08,17,23,40,33,+32" -> "2025-08-17 23:40:33"
     msgDate=$(echo "$msg_date" | sed "s/\([0-9]\+\),\([0-9]\+\),\([0-9]\+\),\([0-9]\+\),\([0-9]\+\),\([0-9]\+\),.*/$(date +%Y)-\2-\3 \4:\5:\6/g")
     plainContent=$(decode_message "$msg_content")
-    echo "$msg_number: $plainContent"$'\n'"$msgDate"  # $'\n' 动态换行 直接\n换行没效果
+    echo "[新]$msg_number, $plainContent $msgDate"  # $'\n' 动态换行 直接\n换行没效果
     # isArchive="0" ; bark是否存档, 验证码不存档
     if [[ "$plainContent" =~ 验证密?码 ]]; then deleteMessage  "$msg_id;" ; notify_bark  "$msg_number"  "$plainContent"$'\n'"$msgDate"  "0";
     elif [[ "$plainContent" =~ 流量(使用|用尽)提醒|话费账单 ]]; then setSmsRead  "$msg_id;"; notify_bark  "$msg_number"  "$plainContent"$'\n'"$msgDate"  "1";
