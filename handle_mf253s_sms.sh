@@ -355,13 +355,13 @@ function lookForUnread(){
     #echo ${msg_tag}
     #echo ${msg_date}
     #echo ${msg_content}
-    # "25,08,17,23,40,33,+32" -> "2025-08-17 23:40:33"
-    msgDate=$(echo "$msg_date" | sed "s/\([0-9]\+\),\([0-9]\+\),\([0-9]\+\),\([0-9]\+\),\([0-9]\+\),\([0-9]\+\),.*/$(date +%Y)-\2-\3 \4:\5:\6/g")
+    # "25,08,17,23,40,33,+32" -> "2025-08-17 23:40:33" $(date +%Y) 2025
+    msgDate=$(echo "$msg_date" | sed "s/\([0-9]\+\),\([0-9]\+\),\([0-9]\+\),\([0-9]\+\),\([0-9]\+\),\([0-9]\+\),.*/\2-\3 \4:\5:\6/g")
     plainContent=$(decode_message "$msg_content")
-    echo "[新]$msg_number, $plainContent $msgDate"  # $'\n' 动态换行 直接\n换行没效果
+    echo "$msg_number"$'\n'"$plainContent($msgDate)"  # $'\n' 动态换行 直接\n换行没效果
     # isArchive="0" ; bark是否存档, 验证码不存档
-    if [[ "$plainContent" =~ 验证密?码 ]]; then deleteMessage  "$msg_id;" ; notify_bark  "$msg_number"  "$plainContent"$'\n'"$msgDate"  "0";
-    elif [[ "$plainContent" =~ 流量(使用|用尽)提醒|话费账单 ]]; then setSmsRead  "$msg_id;"; notify_bark  "$msg_number"  "$plainContent"$'\n'"$msgDate"  "1";
+    if [[ "$plainContent" =~ 验证密?码 ]]; then deleteMessage  "$msg_id;" ; notify_bark  "$msg_number"  "$plainContent($msgDate)"  "0";
+    elif [[ "$plainContent" =~ 流量(使用|用尽)提醒|话费账单 ]]; then setSmsRead  "$msg_id;"; notify_bark  "$msg_number"  "$plainContent($msgDate)"  "1";
     elif [[ "$plainContent" =~ 您已免费获得中国移动.*|到账提醒|(话费|流量)兑换券使用成功|公益短信|公安|应急|爱卫办 ]]; then deleteMessage  "$msg_id;";
     else setSmsRead "$msg_id;"
     fi
