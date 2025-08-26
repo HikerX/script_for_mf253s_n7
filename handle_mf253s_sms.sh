@@ -358,7 +358,7 @@ function lookForUnread(){
     # "25,08,17,23,40,33,+32" -> "2025-08-17 23:40:33" $(date +%Y) 2025
     msgDate=$(echo "$msg_date" | sed "s/\([0-9]\+\),\([0-9]\+\),\([0-9]\+\),\([0-9]\+\),\([0-9]\+\),\([0-9]\+\),.*/\2-\3 \4:\5:\6/g")
     plainContent=$(decode_message "$msg_content")
-    echo "$msg_number"$'\n'"$plainContent($msgDate)"  # $'\n' 动态换行 直接\n换行没效果
+    echo -e "\n$msgDate, $msg_number\n$plainContent"  # $'\n' 动态换行 直接\n换行没效果
     # isArchive="0" ; bark是否存档, 验证码不存档
     if [[ "$plainContent" =~ 验证密?码 ]]; then deleteMessage  "$msg_id;" ; notify_bark  "$msg_number"  "$plainContent($msgDate)"  "0";
     elif [[ "$plainContent" =~ 流量(使用|用尽)提醒|话费账单 ]]; then setSmsRead  "$msg_id;"; notify_bark  "$msg_number"  "$plainContent($msgDate)"  "1";
