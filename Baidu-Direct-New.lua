@@ -46,8 +46,9 @@ function wa_lua_on_handshake_cb(ctx)
         local port = ctx_address_port(ctx)
         local res = 'CONNECT ' .. host .. ':' .. port .. 'HTTP/1.1\r\n' ..
                     'Host:yunpanlive.chinaunicomvideo.cn\r\n' ..
-                    'Proxy-Connection: Keep-Alive\r\n'..
-                    'X-T5-Auth: 683556433\r\nUser-Agent: baiduboxapp\r\n\r\n'
+                    'Proxy-Connection:Keep-Alive\r\n'..
+                    'X-T5-Auth:683556433\r\n'..
+                    'User-Agent:Mozilla/5.0 (iPhone; CPU iPhone OS 12_5_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 SP-engine/2.49.0 main%2F1.0 matrixstyle/0 info baiduboxapp/5.33.0.12 (Baidu; P2 12.3.1) NABar/1.0 themeUA=Theme/default\r\n'
         ctx_write(ctx, res)
         flags[uuid] = kHttpHeaderSent
     end
